@@ -15,8 +15,8 @@ services:
     restart: unless-stopped
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-      - GF_USERS_DEFAULT_THEME=light
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+      - GF_USERS_DEFAULT_THEME=dark
       - GF_LOG_MODE=console
       - GF_LOG_LEVEL=critical
       - GF_PANELS_ENABLE_ALPHA=true
@@ -29,10 +29,10 @@ services:
       - grafana-data:/var/lib/grafana
     depends_on:
       - prometheus
-    ports:
-      - 3000:3000
+    ports: []
     networks:
       - monitoring
+      - proxy
     logging: *default-logging
 
   prometheus:
@@ -54,8 +54,7 @@ services:
       - prometheus-data:/prometheus
     depends_on:
       - alertmanager
-    ports:
-      - 9090:9090
+    ports: []
     networks:
       - monitoring
     logging: *default-logging
@@ -104,19 +103,9 @@ services:
       - '--web.external-url=http://localhost:9093'
     volumes:
       - ./configs/alertmanager/alertmanager-fallback-config.yml:/etc/alertmanager/config.yml
-    ports:
-      - 9093:9093
+    ports: []
     networks:
       - monitoring
-    logging: *default-logging
-
-  redis:
-    image: redis:${REDIS_VERSION:-6}
-    container_name: redis
-    ports:
-      - 6379:6379
-    cpus: 0.5
-    mem_limit: 512m
     logging: *default-logging
 
 volumes:
@@ -126,3 +115,5 @@ volumes:
 networks:
   monitoring:
     name: monitoring
+  proxy:
+    external: true
